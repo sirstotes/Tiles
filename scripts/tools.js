@@ -560,7 +560,9 @@ class SelectTool extends DraggableTool {
                             maker.getSelection().removeIdentical(maker);
                         }
                     }
-                    maker.cancelSelection();
+                    if(!shiftPressed) {
+                        maker.cancelSelection();
+                    }
                 }
                 if(this.startEndEqual()) {
                     maker.firstColliding(mouseX, mouseY, (tile) => {
