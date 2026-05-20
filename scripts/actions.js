@@ -410,18 +410,30 @@ class ResizeCanvasAction extends Action {
 }
 
 class FlipSelectionAction extends Action {
-    constructor(horizontal, vertical) {
+    constructor(selection, horizontal, vertical) {
         super("FLIP");
+        this.selectionIDs = selection.tiles.map(t => t.ID);
         this.horizontal = horizontal;
         this.vertical = vertical;
+        this.bounds = selection.tiles.reduce((a, t) => {
+            let bounds = t.getBounds();
+            if(a == undefined) {
+                return bounds;
+            }
+            return {startX: min(a.startX, bounds.startX), startY: min(a.startY, bounds.startY), endX: max(a.endX, bounds.endX), endY: max(a.endY, bounds.endY)};
+        }, undefined);
     }
     toString() {
         return `${this.name} ${this.horizontal} ${this.vertical}`;
     }
     run() {
-
+        this.selectionIDs.forEach(id => {
+            ID.withObject(id, object => {
+                object.flip(this.bounds, this.horizontal, this.vertical);
+            });
+        });
     }
     undo() {
-        
+        this.run();
     }
 }

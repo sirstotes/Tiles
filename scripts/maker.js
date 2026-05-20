@@ -108,7 +108,7 @@ class Maker {//TODO split into maker and canvas
         }
         if(insideCanvas(mouseX, mouseY) && focused) {
             if(mousePressed && !this.pMousePressed) {
-                this.currentTool.onMousePressed(this, mouseX, mouseY, mouseX != this.pMouseX || mouseY != this.pMouseY);
+                this.currentTool.onMousePressed(this, mouseX, mouseY);
             }
             if(!mousePressed && this.pMousePressed) {
                 this.currentTool.onMouseReleased(this, mouseX, mouseY);
@@ -360,6 +360,10 @@ class Maker {//TODO split into maker and canvas
         } else {
 
         }
+    }
+    flipSelection(h, v) {
+        this.addAction(new FlipSelectionAction(this.selection, h, v));
+        this.submitActions();
     }
     eraseSelection() {
         this.selection.erase(this);

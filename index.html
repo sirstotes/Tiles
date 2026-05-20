@@ -134,45 +134,45 @@
       <div class="bar" id="bottomBar">
         <div class="toolbar">
           <div class="toolbarRow">
-            <button class="shapeButton" id="RECT_Button" onclick="setTool('RECT')"><img src="assets/square.png"></button>
-            <button class="shapeButton" id="WEDGE_Button" onclick="setTool('WEDGE')"><img src="assets/wedge.png"></button>
+            <button class="shapeButton" id="RECT_Button" onclick="setTool('RECT')"><img src="assets/square.png" alt="rect tool"></button>
+            <button class="shapeButton" id="WEDGE_Button" onclick="setTool('WEDGE')"><img src="assets/wedge.png" alt="wedge tool"></button>
             <!-- <button class="shapeButton" id="ELLIPSE_Button" onclick="setTool('ELLIPSE')"><img src="assets/circle.png"></button> -->
-            <button class="shapeButton" id="QUADRANT_Button" onclick="setTool('QUADRANT')"><img src="assets/quadrant.png"></button>
-            <button class="shapeButton" id="INVERSE_QUADRANT_Button" onclick="setTool('INVERSE_QUADRANT')"><img src="assets/inverse-quadrant.png"></button>
-            <button class="shapeButton" id="BEZIER_WEDGE_Button" onclick="setTool('BEZIER_WEDGE')"><img src="assets/bezier-wedge.png"></button>
-            <button class="shapeButton" id="LINE_Button" onclick="setTool('LINE')"><img src="assets/line.png"></button>
-            <button class="shapeButton" id="CURVE_Button" onclick="setTool('CURVE')"><img src="assets/curve.png"></button>
-            <button id="ERASE_Button" onclick="setTool('ERASE')"><img src="assets/erase.png"></button>
-            <button id="PAINT_Button" onclick="setTool('PAINT')"><img src="assets/fill.png"></button>
-            <button id="SELECT_Button" onclick="setTool('SELECT')"><img src="assets/select.png"></button>
-            <button onclick="toggleMenu('toolSettings', this)"><img src="assets/gear.png"></button>
+            <button class="shapeButton" id="QUADRANT_Button" onclick="setTool('QUADRANT')"><img src="assets/quadrant.png" alt="quadrant tool"></button>
+            <button class="shapeButton" id="INVERSE_QUADRANT_Button" onclick="setTool('INVERSE_QUADRANT')"><img src="assets/inverse-quadrant.png" alt="inverse quadrant tool"></button>
+            <button class="shapeButton" id="BEZIER_WEDGE_Button" onclick="setTool('BEZIER_WEDGE')"><img src="assets/bezier-wedge.png" alt="wedge tool"></button>
+            <button class="shapeButton" id="LINE_Button" onclick="setTool('LINE')"><img src="assets/line.png" alt="line tool"></button>
+            <button class="shapeButton" id="CURVE_Button" onclick="setTool('CURVE')"><img src="assets/curve.png" alt="curve tool"></button>
+            <button id="ERASE_Button" onclick="setTool('ERASE')"><img src="assets/erase.png" alt="erase tool"></button>
+            <button id="PAINT_Button" onclick="setTool('PAINT')"><img src="assets/fill.png" alt="fill tool"></button>
+            <button id="SELECT_Button" onclick="setTool('SELECT')"><img src="assets/select.png" alt="select tool"></button>
+            <button onclick="toggleMenu('toolSettings', this)"><img src="assets/gear.png" alt="tool settings"></button>
           </div>
           <div class="toolbarRow">
-            <button id="paletteButton" onclick="toggleMenu('paletteSettings', this)"><img src="assets/palette.png"></button>
-            <button id="EYEDROP_Button" onclick="setTool('EYEDROP')"><img src="assets/eye-dropper.png"></button>
+            <button id="paletteButton" onclick="toggleMenu('paletteSettings', this)"><img src="assets/palette.png" alt="palette"></button>
+            <button id="EYEDROP_Button" onclick="setTool('EYEDROP')"><img src="assets/eye-dropper.png" alt="color select tool"></button>
             <span id="colorPalette" style="flex-grow: 4;"></span>
             <input type="color" id="colorPicker" value="#ff0000" onchange="setColor(this.value)">
           </div>
         </div>
         <div class="extraBar">
           <div class="toolbarRow" style="display:none;" id="pasteTools">
-            <button onclick="clearClipboard()"><img src="assets/cancel.png"></button>
-            <button onclick="paste()"><img src="assets/paste.png"></button>
+            <button onclick="clearClipboard()"><img src="assets/cancel.png" alt="clear clipboard"></button>
+            <button onclick="paste()"><img src="assets/paste.png" alt="paste"></button>
           </div>
           <div class="toolbarRow" style="display:none;" id="selectionTools">
-            <button onclick="cancelSelection()"><img src="assets/cancel.png"></button>
-            <button onclick="groupSelection()"><img src="assets/group.png"></button>
-            <button onclick="ungroupSelection()"><img src="assets/ungroup.png"></button>
-            <button onclick="copySelection()"><img src="assets/copy.png"></button>
+            <button onclick="cancelSelection()"><img src="assets/cancel.png" alt="cancel"></button>
+            <button onclick="groupSelection()"><img src="assets/group.png" alt="group"></button>
+            <button onclick="ungroupSelection()"><img src="assets/ungroup.png" alt="ungroup"></button>
+            <button onclick="copySelection()"><img src="assets/copy.png" alt="copy"></button>
             <!-- <button disabled onclick="rotateSelection(1)"><img src="assets/rotate.png"></button>
-            <button disabled onclick="rotateSelection(-1)"><img src="assets/rotate-reverse.png"></button>
-            <button disabled><img src="assets/reflect-horizontal.png"></button>
-            <button disabled><img src="assets/reflect-vertical.png"></button> -->
-            <button onclick="backSelection()"><img src="assets/bottom.png"></button>
-            <button onclick="frontSelection()"><img src="assets/top.png"></button>
-            <button onclick="eraseSelection()"><img src="assets/erase.png"></button>
+            <button disabled onclick="rotateSelection(-1)"><img src="assets/rotate-reverse.png"></button> -->
+            <button onclick="flipSelection(true, false)"><img src="assets/flip_horizontal.png" alt="flip horizontally"></button>
+            <button onclick="flipSelection(false, true)"><img src="assets/flip_vertical.png" alt="flip vertically"></button>
+            <button onclick="backSelection()"><img src="assets/bottom.png" alt="move to back"></button>
+            <button onclick="frontSelection()"><img src="assets/top.png" alt="move to front"></button>
+            <button onclick="eraseSelection()"><img src="assets/erase.png" alt="erase"></button>
             <span id="bezierControls">
-              <button id="BEZIER_Button" onclick="setTool('BEZIER')"><img src="assets/bezier.png"></button>
+              <button id="BEZIER_Button" onclick="setTool('BEZIER')"><img src="assets/bezier.png" alt="modify bezier"></button>
             </span>
           </div>
           <div class="toolbarRow" style="display:none;" id="lineTools">

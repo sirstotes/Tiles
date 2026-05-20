@@ -231,6 +231,10 @@ function copySelection() {
     maker.copySelection();
 }
 
+function flipSelection(h, v) {
+    maker.flipSelection(h, v);
+}
+
 function clearClipboard() {
     maker.clearClipboard();
 }

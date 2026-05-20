@@ -299,6 +299,12 @@ class TileLike extends IDObject {
     fitsWithin(sX, sY, eX, eY) {
         throw new Error("Not implemented");
     }
+    flip(bounds, h, v) {
+        throw new Error("Not implemented");
+    }
+    getBounds() {
+        throw new Error("Not implemented");
+    }
 }
 
 class Group extends TileLike {
@@ -415,7 +421,7 @@ class Group extends TileLike {
                 }
             }
         }
-        return [minX, minY, maxX, maxY];
+        return {startX: minX, startY: minY, endX: maxX, endY: maxY};
     }
     drawOutline(offsetX, offsetY) {
         let [minX, minY, maxX, maxY] = this.getBounds();
@@ -508,6 +514,39 @@ class Tile extends TileLike {
     }
     fitsWithin(sX, sY, eX, eY) {
         return this.startX >= sX && this.startY >= sY && this.endX <= eX && this.endY <= eY;
+    }
+    flip(bounds, h, v) {
+        if(!this.ignoreRotation) {
+            if(v) {
+                switch(this.rotation) {
+                    case 0: this.rotation = 3; break;
+                    case 1: this.rotation = 2; break;
+                    case 2: this.rotation = 1; break;
+                    case 3: this.rotation = 0; break;
+                }
+            }
+            if(h) {
+                switch(this.rotation) {
+                    case 0: this.rotation = 1; break;
+                    case 1: this.rotation = 0; break;
+                    case 2: this.rotation = 3; break;
+                    case 3: this.rotation = 2; break;
+                }
+            }
+        }
+        if(h) {
+            let sX = this.startX;
+            this.startX = bounds.endX - (this.endX - bounds.startX);
+            this.endX = bounds.endX - (sX - bounds.startX);
+        }
+        if(v) {
+            let sY = this.startY;
+            this.startY = bounds.endY - (this.endY - bounds.startY);
+            this.endY = bounds.endY - (sY - bounds.startY);
+        }
+    }
+    getBounds() {
+        return {startX: this.startX, startY: this.startY, endX: this.endX, endY: this.endY};
     }
 }
 
@@ -954,6 +993,22 @@ class LineTile extends Tile {
     drawOutline(offsetX, offsetY) {
         strokeWeight(this.getStrokeWeight()+10);
         LineTile.drawRaw(this.startX+offsetX, this.startY+offsetY, this.endX+offsetX, this.endY+offsetY, this.rotation, this.getLayer());
+    }
+    getBounds() {
+        let bounds = {startX: min(this.startX, this.endX), startY: min(this.startY, this.endY), endX: max(this.startX, this.endX), endY: max(this.startY, this.endY)};
+        bounds.endX = max(bounds.endX - 1, bounds.startX);
+        bounds.endY = max(bounds.endY - 1, bounds.startY);
+        return bounds;
+    }
+    flip(bounds, h, v) {
+        if(h) {
+            this.startX = bounds.endX - (this.startX - bounds.startX) + 1;
+            this.endX = bounds.endX - (this.endX - bounds.startX) + 1;
+        }
+        if(v) {
+            this.startY = bounds.endY - (this.startY - bounds.startY) + 1;
+            this.endY = bounds.endY - (this.endY - bounds.startY) + 1;
+        }
     }
 }
 
