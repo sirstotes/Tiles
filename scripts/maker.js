@@ -80,7 +80,7 @@ class Maker {//TODO split into maker and canvas
         } else {
             clear();
         }
-        this.currentTool.drawBefore(this);
+        this.currentTool.drawBefore(this, getMouseX(), getMouseY());
         this.render(this.displayCanvas);
         if(this.shouldDrawGrid) {
             this.getActiveLayer().drawGrid();
@@ -88,7 +88,7 @@ class Maker {//TODO split into maker and canvas
         if(this.hasSelection()) {
             this.selection.drawOutlines();
         }
-        this.currentTool.draw(this);
+        this.currentTool.draw(this, getMouseX(), getMouseY());
     }
     update(mouseX, mouseY, mousePressed) {
         if(this.dragging) {

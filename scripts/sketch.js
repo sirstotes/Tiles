@@ -310,6 +310,7 @@ function newProject() {
     let currentTool = maker.currentTool;
     maker = new Maker(document.getElementById("canvasW").value, document.getElementById("canvasH").value, document.getElementById("tileResolution").value, 1, document.getElementById("canvasBG").value);
     maker.currentTool = currentTool;
+    maker.currentTool.onEnable(maker);
     resizeCanvas(maker.width*maker.resolution, maker.height*maker.resolution);
     refreshLayerDisplay();
 }

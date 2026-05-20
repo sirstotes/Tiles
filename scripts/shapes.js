@@ -96,7 +96,7 @@ class Layer extends IDObject {
         super(id);
         this.name = "Layer "+tileCanvas.layers.length;
         this.children = [];
-        this.gridScale = 1;
+        this.gridScale = 0;
         this.canvas = tileCanvas;
         this.hidden = false;
     }

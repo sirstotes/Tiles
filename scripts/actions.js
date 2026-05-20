@@ -332,3 +332,20 @@ class ResizeCanvasAction extends Action {
         setCanvasSize(this.widthBefore, this.heightBefore);
     }
 }
+
+class FlipSelectionAction extends Action {
+    constructor(horizontal, vertical) {
+        super("FLIP");
+        this.horizontal = horizontal;
+        this.vertical = vertical;
+    }
+    toString() {
+        return `${this.name} ${this.horizontal} ${this.vertical}`;
+    }
+    run() {
+
+    }
+    undo() {
+        
+    }
+}
