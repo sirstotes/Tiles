@@ -5,6 +5,7 @@ class ID {
         return this.allObjects.length - 1;
     }
     static set(id, value) {
+        if(id == null) {return}
         ID.allObjects[id] = value;
     }
     static removeObject(id) {
@@ -107,6 +108,81 @@ class RemoveLayerAction extends Action {
     undo() {
         maker.layers.splice(this.positionInParent, 0, new Layer(this.layerID, maker));
         refreshLayerDisplay();
+    }
+}
+class MergeLayerAction extends Action {
+    constructor(layer, lowerLayer) {
+        super("MERGE LAYER");
+        this.layerID = layer.ID;
+        this.topLayerIndex = maker.layers.indexOf(layer);
+        this.lowerLayerID = maker.layers[this.topLayerIndex - 1].ID;
+        this.startIndex = maker.layers[this.topLayerIndex - 1].children.length;
+    }
+    toString() {
+        return `${this.name} ${this.layerID} ${this.lowerLayerID}`;
+    }
+    run() {
+        ID.withObject(this.layerID, (layer) => {
+            ID.withObject(this.lowerLayerID, (lowerLayer) => {
+                lowerLayer.children = lowerLayer.children.concat(layer.children);
+                layer.forEach(child => child.parent = lowerLayer);
+            });
+            maker.removeLayer(layer);
+        });
+        refreshLayerDisplay();
+    }
+    undo() {
+        let newLayer = new Layer(this.layerID, maker);
+        ID.withObject(this.lowerLayerID, (lowerLayer) => {
+            let children = lowerLayer.children.splice(this.startIndex);
+            children.forEach(child => child.parent = newLayer);
+            newLayer.children = children;
+        });
+        maker.layers.splice(this.topLayerIndex, 0, newLayer);
+        refreshLayerDisplay();
+    }
+}
+class LoadTileAction extends Action {
+    constructor(layer, text, clipboard) {
+        super("LOAD");
+        this.layerID = layer.ID;
+        this.text = text;
+        this.blocks = getIndentBlocks(text.split('\n'));
+        this.clipboard = clipboard;
+        this.loadIDs = [];
+    }
+    toString() {
+        return `${this.name} ${this.text}`;
+    }
+    addIDs(tile) {
+        this.loadIDs.push(tile.ID);
+        if(tile instanceof Group) {
+            for(let child of tile.children) {
+                this.addIDs(child);
+            }
+        }
+    }
+    run() {
+        let outermost = [];
+        ID.withObject(this.layerID, (layer) => {
+            this.loadIDs = [];
+            for(let childBlock of this.blocks[0].children) {
+                let t = TileTypeReference[childBlock.head.split(" ")[0]].fromBlock(childBlock, layer);
+                
+                outermost.push(t);
+                this.addIDs(t);
+                layer.addChild(t);
+            }
+        });
+        return outermost;
+    }
+    undo() {
+        for(let tileID of this.loadIDs) {
+            ID.withObject(tileID, (tile) => {
+                maker.eraseTile(tile);
+            });
+            ID.removeObject(tileID);
+        }
     }
 }
 class AddTileAction extends Action {

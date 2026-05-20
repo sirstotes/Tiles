@@ -135,6 +135,12 @@ class Layer extends IDObject {
     toStart(x) {//Moves the value to the start of the nearest grid line
         return floor(x / (2**this.gridScale)) * (2**this.gridScale)
     }
+    toNearest(x) {
+        return floor(x / (2**this.gridScale)) * (2**this.gridScale);
+    }
+    toMiddle(x) {//Moves the value to the center of the grid lines
+        return floor(x / (2**this.gridScale)) * (2**this.gridScale) + (2**this.gridScale) * 0.5
+    }
     toEnd(x) {//Moves the value to the end of the nearest grid line
         return floor(x / (2**this.gridScale)) * (2**this.gridScale) + (2**this.gridScale) - 1
     }
@@ -262,6 +268,12 @@ class TileLike extends IDObject {
     getIndexInParent() {
         return this.parent.children.indexOf(this);
     }
+    sameAs(otherTile) {
+        return false;
+    }
+    clone(parent) {
+        throw new Error("Not implemented");
+    }
     setColor(color) {
         throw new Error("Not implemented");
     }
@@ -310,6 +322,11 @@ class Group extends TileLike {
             str += "\n" + child.saveToString(indent + 1);
         }
         return str;
+    }
+    clone(parent) {
+        let clone = new Group(null, parent);
+        this.children.forEach(child => clone.children.push(child.clone(clone)));
+        return clone;
     }
     remove(index) {
         if (index >= 0 && index < this.children.length) {
@@ -459,6 +476,9 @@ class Tile extends TileLike {
     }
     static checkCollision(sX, sY, eX, eY, r, layer, mouseX, mouseY) {
         throw new Error("Not implemented");
+    }
+    clone(parent) {
+        return new this.constructor(null, this.startX, this.startY, this.endX, this.endY, this.rotation, this.color, parent);
     }
     move(offsetX, offsetY) {
         this.startX += offsetX;
@@ -761,6 +781,14 @@ class BezierWedgeTile extends WedgeTile {
         newBez.endControlY = float(options[10]);
         return newBez;
     }
+    clone(parent) {
+        let clone = super.clone(parent);
+        clone.startControlX = this.startControlX;
+        clone.startControlY = this.startControlY;
+        clone.endControlX = this.endControlX;
+        clone.endControlY = this.endControlY;
+        return clone;
+    }
     saveToString(indent) {
         return super.saveToString(indent) + ` ${this.startControlX} ${this.startControlY} ${this.endControlX} ${this.endControlY}`;
     }
@@ -909,6 +937,11 @@ class LineTile extends Tile {
     }
     saveToString(indent) {
         return super.saveToString(indent) + ` ${this.strokeWeight}`;
+    }
+    clone(parent) {
+        let clone = super.clone(parent);
+        clone.strokeWeight = this.strokeWeight;
+        return clone;
     }
     getStrokeWeight() {
         return this.getLayer().getResolution()*(2**this.strokeWeight);

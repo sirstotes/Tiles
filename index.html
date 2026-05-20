@@ -74,47 +74,6 @@
               <button onclick="saveProject();">Save as file</button></span>
           </div>
           <div style="background:none;pointer-events: none;flex-grow:1;"></div>
-          <div id="toolSettings" class="sideMenu" style="display: none;">
-            <h3>Tool Settings</h3>
-            <span>
-              <span style="width:40%;">Replacement Mode:</span>
-              <select id="replacementModeSelect" onchange="setToolOption('REPLACEMENT_MODE', this.value)">
-                <option value="IDENTICAL">Identical</option>
-                <option value="ALL">All</option>
-                <option value="NONE">None</option>
-              </select>
-            </span>
-            <span>
-              <span style="width:40%;">Drag Mode:</span>
-              <select id="placementModeSelect" onchange="setToolOption('DRAG_MODE', this.value)">
-                <option value="AREA">Area</option>
-                <option value="DRAW">Draw</option>
-              </select>
-            </span>
-            <span>
-              <span style="width:40%;">Selection Mode:</span>
-              <select id="selectionModeSelect" onchange="setToolOption('SELECTION_MODE', this.value)">
-                <option value="CONTAIN">Contain</option>
-                <option value="OVERLAP">Overlap</option>
-              </select>
-            </span>
-          </div>
-        </div>
-        <div style="pointer-events: auto;">
-          <div id="layers" class="sideMenu" style="display: none;">
-            <h3>Layers</h3>
-            <div id="layerDisplay"></div>
-            <button onclick="addLayer()">New</button>
-          </div>
-          <div id="layerSettings" class="sideMenu" style="display: none;">
-            <h4>Layer Settings</h4>
-            <span>Name: <input class="inlineInput" type="text" id="layerNameInput" onclick="this.select()"></span>
-            <span>Scale: <input type="range" min="0" max="4" value="2" id="layerScaleRange"></span>
-            <span>X Offset: <input class="inlineInput" id="layerOffsetXCheckbox" type="checkbox"></span>
-            <span>Y Offset: <input class="inlineInput" id="layerOffsetYCheckbox" type="checkbox"></span>
-            <button id="layerRemoveButton">Remove Layer</button>
-          </div>
-          <div style="background:none;flex-grow:1;"></div>
           <div id="paletteSettings" class="sideMenu" style="display: none;">
             <h3>Palette</h3>
             <span>
@@ -130,11 +89,51 @@
             </span>
           </div>
         </div>
+        <div style="pointer-events: auto;">
+          <div id="layers" class="sideMenu" style="display: none;">
+            <h3>Layers</h3>
+            <div id="layerDisplay"></div>
+            <button onclick="addLayer()">New</button>
+          </div>
+          <div id="layerSettings" class="sideMenu" style="display: none;">
+            <h4>Layer Settings</h4>
+            <span>Name: <input class="inlineInput" type="text" id="layerNameInput" onclick="this.select()"></span>
+            <span>Scale: <input type="range" min="0" max="4" value="2" id="layerScaleRange"></span>
+            <span style="display:none;">X Offset: <input class="inlineInput" id="layerOffsetXCheckbox" type="checkbox">Y Offset: <input class="inlineInput" id="layerOffsetYCheckbox" type="checkbox"></span>
+            <button id="mergeLayerButton">Merge Layer With Previous</button>
+            <button id="layerRemoveButton">Remove Layer</button>
+          </div>
+          <div style="background:none;flex-grow:1;"></div>
+          <div id="toolSettings" class="sideMenu" style="display: none;">
+            <h3>Tool Settings</h3>
+            <span>
+              <span style="width:40%;">Replacement Mode:</span>
+              <select id="replacementModeSelect" onchange="setToolOption('REPLACEMENT_MODE', this.value)">
+                <option value="IDENTICAL">Identical</option>
+                <option value="ALL">All</option>
+                <option value="NONE">None</option>
+              </select>
+            </span>
+            <span style="display: none;">
+              <span style="width:40%;">Drag Mode:</span>
+              <select id="placementModeSelect" onchange="setToolOption('DRAG_MODE', this.value)">
+                <option value="AREA">Area</option>
+                <option value="DRAW">Draw</option>
+              </select>
+            </span>
+            <span>
+              <span style="width:40%;">Selection Mode:</span>
+              <select id="selectionModeSelect" onchange="setToolOption('SELECTION_MODE', this.value)">
+                <option value="CONTAIN">Contain</option>
+                <option value="OVERLAP">Overlap</option>
+              </select>
+            </span>
+          </div>
+        </div>
       </div>
       <div class="bar" id="bottomBar">
         <div class="toolbar">
           <div class="toolbarRow">
-            <button onclick="toggleMenu('toolSettings', this)"><img src="assets/gear.png"></button>
             <button class="shapeButton" id="RECT_Button" onclick="setTool('RECT')"><img src="assets/square.png"></button>
             <button class="shapeButton" id="WEDGE_Button" onclick="setTool('WEDGE')"><img src="assets/wedge.png"></button>
             <!-- <button class="shapeButton" id="ELLIPSE_Button" onclick="setTool('ELLIPSE')"><img src="assets/circle.png"></button> -->
@@ -146,20 +145,25 @@
             <button id="ERASE_Button" onclick="setTool('ERASE')"><img src="assets/erase.png"></button>
             <button id="PAINT_Button" onclick="setTool('PAINT')"><img src="assets/fill.png"></button>
             <button id="SELECT_Button" onclick="setTool('SELECT')"><img src="assets/select.png"></button>
+            <button onclick="toggleMenu('toolSettings', this)"><img src="assets/gear.png"></button>
           </div>
           <div class="toolbarRow">
+            <button id="paletteButton" onclick="toggleMenu('paletteSettings', this)"><img src="assets/palette.png"></button>
+            <button id="EYEDROP_Button" onclick="setTool('EYEDROP')"><img src="assets/eye-dropper.png"></button>
             <span id="colorPalette" style="flex-grow: 4;"></span>
             <input type="color" id="colorPicker" value="#ff0000" onchange="setColor(this.value)">
-            <button id="EYEDROP_Button" onclick="setTool('EYEDROP')"><img src="assets/eye-dropper.png"></button>
-            <button id="paletteButton" onclick="toggleMenu('paletteSettings', this)"><img src="assets/palette.png"></button>
           </div>
         </div>
-        <div class="toolbar extraBar" style="display:none;" id="selectionTools">
-          <div class="toolbarRow">
+        <div class="extraBar">
+          <div class="toolbarRow" style="display:none;" id="pasteTools">
+            <button onclick="clearClipboard()"><img src="assets/cancel.png"></button>
+            <button onclick="paste()"><img src="assets/paste.png"></button>
+          </div>
+          <div class="toolbarRow" style="display:none;" id="selectionTools">
             <button onclick="cancelSelection()"><img src="assets/cancel.png"></button>
             <button onclick="groupSelection()"><img src="assets/group.png"></button>
             <button onclick="ungroupSelection()"><img src="assets/ungroup.png"></button>
-            <button onclick="duplicateSelection()"><img src="assets/copy.png"></button>
+            <button onclick="copySelection()"><img src="assets/copy.png"></button>
             <!-- <button disabled onclick="rotateSelection(1)"><img src="assets/rotate.png"></button>
             <button disabled onclick="rotateSelection(-1)"><img src="assets/rotate-reverse.png"></button>
             <button disabled><img src="assets/reflect-horizontal.png"></button>
@@ -171,9 +175,7 @@
               <button id="BEZIER_Button" onclick="setTool('BEZIER')"><img src="assets/bezier.png"></button>
             </span>
           </div>
-        </div>
-        <div class="toolbar extraBar" style="display:none;" id="lineTools">
-          <div class="toolbarRow">
+          <div class="toolbarRow" style="display:none;" id="lineTools">
             <button onclick="decreaseLineWeight()"><img src="assets/minus.png"></button>
             <span id="currentLineWeightSpan"></span>
             <button onclick="increaseLineWeight()"><img src="assets/plus.png"></button>

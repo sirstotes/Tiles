@@ -104,6 +104,12 @@ main {
 .extraBar {
     align-self:center;
     border-radius: 8px;
+    display: flex;
+    flex-direction: row;
+}
+.extraBar > .toolbarRow {
+    pointer-events: auto;
+    padding: 8px;
 }
 #UI {
     position:absolute;

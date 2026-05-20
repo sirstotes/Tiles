@@ -23,17 +23,13 @@ class Maker {//TODO split into maker and canvas
         for(let i = 0; i < layers; i ++) {
             this.layers.push(new Layer(ID.getNext(), this));
         }
+        this.currentLayer = 0;
         this.shouldDrawGrid = true;
         this.currentTool = Maker.TOOLS.RECT;
         this.currentTool.onEnable(this);
         this.currentColor = '#000000';
-        this.currentStartMouseX = 0;
-        this.currentStartMouseY = 0;
-        this.currentEndMouseX = 0;
-        this.currentEndMouseY = 0;
-        this.currentRotation = 0;
-        this.currentLayer = 0;
         this.movingSelection = false;
+        this.clipboard = '';
         this.selection = null;
         this.dragging = false;
         this.pMousePressed = false;
@@ -94,25 +90,25 @@ class Maker {//TODO split into maker and canvas
         if(this.dragging) {
             if(!mousePressed) {
                 if(insideCanvas(mouseX, mouseY) && focused) {
-                    this.currentTool.onDragEnd(this);
+                    this.currentTool.onDragEnd(this, mouseX, mouseY);
                 }
                 this.dragging = false;
             } else {
-                this.currentTool.onDrag(this);
+                this.currentTool.onDrag(this, mouseX, mouseY);
             }
         } else {
             if(insideCanvas(mouseX, mouseY) && focused) {
                 this.currentStartMouseX = round(mouseX);
                 this.currentStartMouseY = round(mouseY);
                 if(mousePressed && mouseButton == "left") {
-                    this.currentTool.onDragStart(this);
+                    this.currentTool.onDragStart(this, mouseX, mouseY);
                     this.dragging = true;
                 }
             }
         }
         if(insideCanvas(mouseX, mouseY) && focused) {
             if(mousePressed && !this.pMousePressed) {
-                this.currentTool.onMousePressed(this, mouseX, mouseY);
+                this.currentTool.onMousePressed(this, mouseX, mouseY, mouseX != this.pMouseX || mouseY != this.pMouseY);
             }
             if(!mousePressed && this.pMousePressed) {
                 this.currentTool.onMouseReleased(this, mouseX, mouseY);
@@ -127,36 +123,6 @@ class Maker {//TODO split into maker and canvas
         this.pMouseX = mouseX;
         this.pMouseY = mouseY;
         this.pMousePressed = mousePressed;
-    }
-    getStartX() {
-        return this.getActiveLayer().toLCF(min(this.currentStartMouseX, this.currentEndMouseX));
-    }
-    getStartY() {
-        return this.getActiveLayer().toLCFY(min(this.currentStartMouseY, this.currentEndMouseY));
-    }
-    getEndX() {
-        return this.getActiveLayer().toLCF(max(this.currentStartMouseX, this.currentEndMouseX));
-    }
-    getEndY() {
-        return this.getActiveLayer().toLCFY(max(this.currentStartMouseY, this.currentEndMouseY));
-    }
-    getCurrentX() {
-        return this.getActiveLayer().toLCF(this.currentEndMouseX);
-    }
-    getCurrentY() {
-        return this.getActiveLayer().toLCFY(this.currentEndMouseY);
-    }
-    getXOffset() {
-        return this.getActiveLayer().toLCF(this.currentEndMouseX - this.currentStartMouseX);
-    }
-    getYOffset() {
-        return this.getActiveLayer().toLCFY(this.currentEndMouseY - this.currentStartMouseY);
-    }
-    startEndEqual() {
-        return this.getStartX() == this.getEndX() && this.getStartY() == this.getEndY();
-    }
-    getRotation() {
-        return this.currentRotation;
     }
     getSelection() {
         return this.selection;
@@ -196,8 +162,12 @@ class Maker {//TODO split into maker and canvas
         this.saving = false;
         saveCanvas(fileName+".png");
     }
+    selectActiveLayer() {
+        this.selection = new Selection([...this.getActiveLayer().children]);
+    }
     setCurrentLayer(index) {
         this.currentLayer = index;
+        this.currentTool.setLayer(this.layers[this.currentLayer]);
         refreshLayerSettings(this.layers[this.currentLayer]);
         refreshLayerDisplay();
     }
@@ -227,6 +197,8 @@ class Maker {//TODO split into maker and canvas
         this.newActions = [];
         this.currentAction = -1;
         this.layers = [new Layer(ID.getNext(), this)];
+        this.currentLayer = 0;
+        this.currentTool.setLayer(this.layers[this.currentLayer]);
         this.selection = undefined;
     }
     setColor(color) {
@@ -341,7 +313,7 @@ class Maker {//TODO split into maker and canvas
 
     addClones(shape) {
         if(shape instanceof Tile) {
-            this.addAction(new AddTileAction(ID.getNext(), shape.constructor, shape.startX+1, shape.startY+1, shape.endX+1, shape.endY+1, shape.rotation, shape.color, this.getActiveLayer().ID))
+            this.addAction(new AddTileAction(ID.getNext(), shape.constructor, shape.startX+1, shape.startY+1, shape.endX+1, shape.endY+1, shape.rotation, shape.color, this.getActiveLayer().ID));
         } else if (shape instanceof Group) {
             for(let child of shape.children) {
                 this.addClones(child);
@@ -349,15 +321,25 @@ class Maker {//TODO split into maker and canvas
         }
     }
 
-    duplicateSelection() {
+    copySelection() {
+        let t = "TC CLIPBOARD:\n";
         for(let shape of this.selection.tiles) {
-            this.addClones(shape);
+            t += shape.saveToString(1) + '\n';
         }
-        let returns = this.submitActions();
-        if(returns != null) {
-            let newSelection = returns.map((tileID) => ID.getOrNull(tileID)).filter((tile) => tile != null);
-            this.selection = new Selection(newSelection);
-        }
+        console.log("COPIED", t);
+        this.clipboard = t;
+        navigator.clipboard.writeText(t);
+    }
+    clearClipboard() {
+        this.clipboard = '';
+    }
+    loadText(text) {
+        this.addAction(new LoadTileAction(this.getActiveLayer(), text, true));
+        let res = this.submitActions();
+        this.selection = new Selection(res);
+    }
+    paste() {
+        this.loadText(this.clipboard);
     }
 
     backSelection() {
