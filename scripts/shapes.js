@@ -383,50 +383,23 @@ class Group extends TileLike {
     }
     draw() {
         for(let child of this.children) {
+            noStroke();
             child.draw();
         }
     }
     getBounds() {
-        let minX = null;
-        let minY = null;
-        let maxX = null;
-        let maxY = null;
-        for(let child of this.children) {
-            if(child instanceof Group) {
-                let [mnx, mny, mxx, mxy] = child.getBounds();
-                if(mnx < minX || minX == null) {
-                    minX = mnx;
-                }
-                if(mny < minY || minY == null) {
-                    minY = mny;
-                }
-                if(mxx > maxX || maxX == null) {
-                    maxX = mxx;
-                }
-                if(mxy > maxY || maxY == null) {
-                    maxY = mxy;
-                }
-            } else {
-                if(child.startX < minX || minX == null) {
-                    minX = child.startX;
-                }
-                if(child.startY < minY || minY == null) {
-                    minY = child.startY;
-                }
-                if(child.endX > maxX || maxX == null) {
-                    maxX = child.endX;
-                }
-                if(child.endY > maxY || maxY == null) {
-                    maxY = child.endY;
-                }
+        return this.children.reduce((a, t) => {
+            let bounds = t.getBounds();
+            if(a == undefined) {
+                return bounds;
             }
-        }
-        return {startX: minX, startY: minY, endX: maxX, endY: maxY};
+            return {startX: min(a.startX, bounds.startX), startY: min(a.startY, bounds.startY), endX: max(a.endX, bounds.endX), endY: max(a.endY, bounds.endY)};
+        }, undefined);
     }
     drawOutline(offsetX, offsetY) {
-        let [minX, minY, maxX, maxY] = this.getBounds();
+        let bounds = this.getBounds();
         noFill();
-        rect(this.getLayer().toSCFX(minX+offsetX), this.getLayer().toSCFY(minY+offsetY), this.getLayer().toSCCX(maxX+offsetX), this.getLayer().toSCCY(maxY+offsetY));
+        rect(this.getLayer().toSCFX(bounds.startX+offsetX), this.getLayer().toSCFY(bounds.startY+offsetY), this.getLayer().toSCCX(bounds.endX+offsetX), this.getLayer().toSCCY(bounds.endY+offsetY));
     }
     collidesWith(mouseX, mouseY) {
         for(let child of this.children) {
@@ -452,7 +425,11 @@ class Group extends TileLike {
         }
         return true;
     }
-    
+    flip(bounds, h, v) {
+        for(let child of this.children) {
+            child.flip(bounds, h, v);
+        }
+    }
 }
 
 class Tile extends TileLike {
