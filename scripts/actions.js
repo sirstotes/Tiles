@@ -239,6 +239,13 @@ class RemoveTileAction extends Action {
     }
 }
 class ModifyTileAction extends Action {
+    static create(tile, property, newValue) {
+        if(tile instanceof Group) {
+            return new MultiAction(tile.children.map(t => ModifyTileAction.create(t, property, newValue)));
+        } else if (tile instanceof Tile) {
+            return new ModifyTileAction(tile.ID, property, tile[property], newValue);
+        }
+    }
     constructor(tileID, property, previousValue, newValue) {
         super("MODIFY");
         this.tileID = tileID;
@@ -342,7 +349,7 @@ class RemoveGroupAction extends Action {
         super("UNGROUP");
         this.groupID = group.ID;
         this.tileIDs = group.children.map(child => child.ID);
-        this.parentID = group.parent;
+        this.parentID = group.parent.ID;
     }
     toString() {
         return `${this.name} ${this.groupID} ${this.tileIDs} ${this.parentID}`;

@@ -462,7 +462,7 @@ class PaintTool extends DraggableTool {
         super.onMousePressed(maker, mouseX, mouseY);
         if(Tool.DRAG_MODE == Tool.DRAG_MODE_OPTIONS.DRAW) {
             maker.firstCollidingInSelection(mouseX, mouseY, (tile) => {
-                maker.addAction(new ModifyTileAction(tile.ID, "color", tile.color, maker.getColor()));
+                maker.addAction(ModifyTileAction.create(tile, "color", maker.getColor()));
                 maker.submitActions();
             });
         }
@@ -470,7 +470,7 @@ class PaintTool extends DraggableTool {
     onDrag(maker, mouseX, mouseY) {
         if(Tool.DRAG_MODE == Tool.DRAG_MODE_OPTIONS.DRAW) {
             maker.firstCollidingInSelection(mouseX, mouseY, (tile) => {
-                maker.addAction(new ModifyTileAction(tile.ID, "color", tile.color, maker.getColor()));
+                maker.addAction(ModifyTileAction.create(tile, "color", maker.getColor()));
                 maker.submitActions();
             });
         }
@@ -479,17 +479,17 @@ class PaintTool extends DraggableTool {
         if(Tool.DRAG_MODE == Tool.DRAG_MODE_OPTIONS.AREA) {
             if(this.startEndEqual()) {
                 maker.firstCollidingInSelection(mouseX, mouseY, (tile) => {
-                    maker.addAction(new ModifyTileAction(tile.ID, "color", tile.color, maker.getColor()));
+                    maker.addAction(ModifyTileAction.create(tile, "color", maker.getColor()));
                     maker.submitActions();
                 });
             } else if(Tool.SELECTION_MODE == Tool.SELECTION_MODE_OPTIONS.CONTAIN) {
                 maker.allWithinSelection(this.getStartX(), this.getStartY(), this.getEndX(), this.getEndY(), (tile) => {
-                    maker.addAction(new ModifyTileAction(tile.ID, "color", tile.color, maker.getColor()));
+                    maker.addAction(ModifyTileAction.create(tile, "color", maker.getColor()));
                 });
                 maker.submitActions();
             } else {
                 maker.allOverlappingSelection(this.getStartX(), this.getStartY(), this.getEndX(), this.getEndY(), (tile) => {
-                    maker.addAction(new ModifyTileAction(tile.ID, "color", tile.color, maker.getColor()));
+                    maker.addAction(ModifyTileAction.create(tile, "color", maker.getColor()));
                 });
                 maker.submitActions();
             }
