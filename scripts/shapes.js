@@ -96,7 +96,7 @@ class Layer extends IDObject {
         super(id);
         this.name = "Layer "+tileCanvas.layers.length;
         this.children = [];
-        this.gridScale = 1;
+        this.gridScale = 0;
         this.canvas = tileCanvas;
         this.hidden = false;
     }
@@ -299,6 +299,12 @@ class TileLike extends IDObject {
     fitsWithin(sX, sY, eX, eY) {
         throw new Error("Not implemented");
     }
+    flip(bounds, h, v) {
+        throw new Error("Not implemented");
+    }
+    getBounds() {
+        throw new Error("Not implemented");
+    }
 }
 
 class Group extends TileLike {
@@ -377,50 +383,23 @@ class Group extends TileLike {
     }
     draw() {
         for(let child of this.children) {
+            noStroke();
             child.draw();
         }
     }
     getBounds() {
-        let minX = null;
-        let minY = null;
-        let maxX = null;
-        let maxY = null;
-        for(let child of this.children) {
-            if(child instanceof Group) {
-                let [mnx, mny, mxx, mxy] = child.getBounds();
-                if(mnx < minX || minX == null) {
-                    minX = mnx;
-                }
-                if(mny < minY || minY == null) {
-                    minY = mny;
-                }
-                if(mxx > maxX || maxX == null) {
-                    maxX = mxx;
-                }
-                if(mxy > maxY || maxY == null) {
-                    maxY = mxy;
-                }
-            } else {
-                if(child.startX < minX || minX == null) {
-                    minX = child.startX;
-                }
-                if(child.startY < minY || minY == null) {
-                    minY = child.startY;
-                }
-                if(child.endX > maxX || maxX == null) {
-                    maxX = child.endX;
-                }
-                if(child.endY > maxY || maxY == null) {
-                    maxY = child.endY;
-                }
+        return this.children.reduce((a, t) => {
+            let bounds = t.getBounds();
+            if(a == undefined) {
+                return bounds;
             }
-        }
-        return [minX, minY, maxX, maxY];
+            return {startX: min(a.startX, bounds.startX), startY: min(a.startY, bounds.startY), endX: max(a.endX, bounds.endX), endY: max(a.endY, bounds.endY)};
+        }, undefined);
     }
     drawOutline(offsetX, offsetY) {
-        let [minX, minY, maxX, maxY] = this.getBounds();
+        let bounds = this.getBounds();
         noFill();
-        rect(this.getLayer().toSCFX(minX+offsetX), this.getLayer().toSCFY(minY+offsetY), this.getLayer().toSCCX(maxX+offsetX), this.getLayer().toSCCY(maxY+offsetY));
+        rect(this.getLayer().toSCFX(bounds.startX+offsetX), this.getLayer().toSCFY(bounds.startY+offsetY), this.getLayer().toSCCX(bounds.endX+offsetX), this.getLayer().toSCCY(bounds.endY+offsetY));
     }
     collidesWith(mouseX, mouseY) {
         for(let child of this.children) {
@@ -446,7 +425,11 @@ class Group extends TileLike {
         }
         return true;
     }
-    
+    flip(bounds, h, v) {
+        for(let child of this.children) {
+            child.flip(bounds, h, v);
+        }
+    }
 }
 
 class Tile extends TileLike {
@@ -508,6 +491,39 @@ class Tile extends TileLike {
     }
     fitsWithin(sX, sY, eX, eY) {
         return this.startX >= sX && this.startY >= sY && this.endX <= eX && this.endY <= eY;
+    }
+    flip(bounds, h, v) {
+        if(!this.ignoreRotation) {
+            if(v) {
+                switch(this.rotation) {
+                    case 0: this.rotation = 3; break;
+                    case 1: this.rotation = 2; break;
+                    case 2: this.rotation = 1; break;
+                    case 3: this.rotation = 0; break;
+                }
+            }
+            if(h) {
+                switch(this.rotation) {
+                    case 0: this.rotation = 1; break;
+                    case 1: this.rotation = 0; break;
+                    case 2: this.rotation = 3; break;
+                    case 3: this.rotation = 2; break;
+                }
+            }
+        }
+        if(h) {
+            let sX = this.startX;
+            this.startX = bounds.endX - (this.endX - bounds.startX);
+            this.endX = bounds.endX - (sX - bounds.startX);
+        }
+        if(v) {
+            let sY = this.startY;
+            this.startY = bounds.endY - (this.endY - bounds.startY);
+            this.endY = bounds.endY - (sY - bounds.startY);
+        }
+    }
+    getBounds() {
+        return {startX: this.startX, startY: this.startY, endX: this.endX, endY: this.endY};
     }
 }
 
@@ -954,6 +970,22 @@ class LineTile extends Tile {
     drawOutline(offsetX, offsetY) {
         strokeWeight(this.getStrokeWeight()+10);
         LineTile.drawRaw(this.startX+offsetX, this.startY+offsetY, this.endX+offsetX, this.endY+offsetY, this.rotation, this.getLayer());
+    }
+    getBounds() {
+        let bounds = {startX: min(this.startX, this.endX), startY: min(this.startY, this.endY), endX: max(this.startX, this.endX), endY: max(this.startY, this.endY)};
+        bounds.endX = max(bounds.endX - 1, bounds.startX);
+        bounds.endY = max(bounds.endY - 1, bounds.startY);
+        return bounds;
+    }
+    flip(bounds, h, v) {
+        if(h) {
+            this.startX = bounds.endX - (this.startX - bounds.startX) + 1;
+            this.endX = bounds.endX - (this.endX - bounds.startX) + 1;
+        }
+        if(v) {
+            this.startY = bounds.endY - (this.startY - bounds.startY) + 1;
+            this.endY = bounds.endY - (this.endY - bounds.startY) + 1;
+        }
     }
 }
 

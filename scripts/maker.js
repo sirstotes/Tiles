@@ -76,7 +76,7 @@ class Maker {//TODO split into maker and canvas
         } else {
             clear();
         }
-        this.currentTool.drawBefore(this);
+        this.currentTool.drawBefore(this, getMouseX(), getMouseY());
         this.render(this.displayCanvas);
         if(this.shouldDrawGrid) {
             this.getActiveLayer().drawGrid();
@@ -84,7 +84,7 @@ class Maker {//TODO split into maker and canvas
         if(this.hasSelection()) {
             this.selection.drawOutlines();
         }
-        this.currentTool.draw(this);
+        this.currentTool.draw(this, getMouseX(), getMouseY());
     }
     update(mouseX, mouseY, mousePressed) {
         if(this.dragging) {
@@ -108,7 +108,7 @@ class Maker {//TODO split into maker and canvas
         }
         if(insideCanvas(mouseX, mouseY) && focused) {
             if(mousePressed && !this.pMousePressed) {
-                this.currentTool.onMousePressed(this, mouseX, mouseY, mouseX != this.pMouseX || mouseY != this.pMouseY);
+                this.currentTool.onMousePressed(this, mouseX, mouseY);
             }
             if(!mousePressed && this.pMousePressed) {
                 this.currentTool.onMouseReleased(this, mouseX, mouseY);
@@ -360,6 +360,10 @@ class Maker {//TODO split into maker and canvas
         } else {
 
         }
+    }
+    flipSelection(h, v) {
+        this.addAction(new FlipSelectionAction(this.selection, h, v));
+        this.submitActions();
     }
     eraseSelection() {
         this.selection.erase(this);

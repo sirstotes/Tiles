@@ -239,6 +239,13 @@ class RemoveTileAction extends Action {
     }
 }
 class ModifyTileAction extends Action {
+    static create(tile, property, newValue) {
+        if(tile instanceof Group) {
+            return new MultiAction(tile.children.map(t => ModifyTileAction.create(t, property, newValue)));
+        } else if (tile instanceof Tile) {
+            return new ModifyTileAction(tile.ID, property, tile[property], newValue);
+        }
+    }
     constructor(tileID, property, previousValue, newValue) {
         super("MODIFY");
         this.tileID = tileID;
@@ -342,7 +349,7 @@ class RemoveGroupAction extends Action {
         super("UNGROUP");
         this.groupID = group.ID;
         this.tileIDs = group.children.map(child => child.ID);
-        this.parentID = group.parent;
+        this.parentID = group.parent.ID;
     }
     toString() {
         return `${this.name} ${this.groupID} ${this.tileIDs} ${this.parentID}`;
@@ -406,5 +413,34 @@ class ResizeCanvasAction extends Action {
     }
     undo() {
         setCanvasSize(this.widthBefore, this.heightBefore);
+    }
+}
+
+class FlipSelectionAction extends Action {
+    constructor(selection, horizontal, vertical) {
+        super("FLIP");
+        this.selectionIDs = selection.tiles.map(t => t.ID);
+        this.horizontal = horizontal;
+        this.vertical = vertical;
+        this.bounds = selection.tiles.reduce((a, t) => {
+            let bounds = t.getBounds();
+            if(a == undefined) {
+                return bounds;
+            }
+            return {startX: min(a.startX, bounds.startX), startY: min(a.startY, bounds.startY), endX: max(a.endX, bounds.endX), endY: max(a.endY, bounds.endY)};
+        }, undefined);
+    }
+    toString() {
+        return `${this.name} ${this.horizontal} ${this.vertical}`;
+    }
+    run() {
+        this.selectionIDs.forEach(id => {
+            ID.withObject(id, object => {
+                object.flip(this.bounds, this.horizontal, this.vertical);
+            });
+        });
+    }
+    undo() {
+        this.run();
     }
 }
