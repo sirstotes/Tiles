@@ -1,4 +1,5 @@
-
+//TODO: Eliminate global variable usage
+//TODO: split into p5 stuff and dom interaction stuff
 let maker;
 
 let defaultPalette = ["#000000", "#1D2B53", "#7E2553", "#008751", "#AB5236", "#5F574F", "#C2C3C7", "#FFF1E8", "#FF004D", "#FFA300", "#FFEC27", "#00E436", "#29ADFF", "#83769C", "#FF77A8", "#FFCCAA"];
@@ -235,6 +236,10 @@ function flipSelection(h, v) {
     maker.flipSelection(h, v);
 }
 
+function rotateSelection(c) {
+    maker.rotateSelection(c);
+}
+
 function clearClipboard() {
     maker.clearClipboard();
 }
@@ -264,10 +269,6 @@ function frontSelection() {
     maker.frontSelection();
 }
 
-function rotateSelection(direction) {
-    maker.eraseSelection();
-}
-
 function eraseSelection() {
     maker.eraseSelection();
 }
@@ -290,6 +291,16 @@ function decreaseLineWeight() {
     } else if (maker.currentTool == Maker.TOOLS.SELECT) {
         Maker.TOOLS["LINE"].decreaseStrokeWeight();
         Maker.TOOLS["SELECT"].decreaseStrokeWeight();
+    }
+}
+function cancelText() {
+    if(maker.currentTool == Maker.TOOLS.TEXT) {
+        maker.currentTool.cancel();
+    }
+}
+function confirmText() {
+    if(maker.currentTool == Maker.TOOLS.TEXT) {
+        maker.currentTool.confirm();
     }
 }
 
@@ -577,6 +588,10 @@ function setup() {
         loadColors([...defaultPalette]);
     }
 
+    //loadFont('/assets/CourierPrime-Regular.ttf');
+    textFont('Courier New');
+    textAlign(CENTER, CENTER);
+    angleMode(DEGREES);
 
     c.parent('canvasContainer');
     canvas = document.getElementById("canvasContainer").firstChild;
@@ -647,6 +662,11 @@ function draw() {
             document.getElementById("lineTools").style = "display: none;";
         }
     }
+    if(maker.currentTool == Maker.TOOLS.TEXT && maker.currentTool.mode == TextTool.MODES.TYPING) {
+        document.getElementById("textTools").style = "";
+    } else {
+        document.getElementById("textTools").style = "display: none;";
+    }
 
     if(maker.clipboard.length > 0) {
         if(document.getElementById("pasteTools").style.display == 'none' && maker.clipboard.startsWith('TC CLIPBOARD:\n')) {
@@ -675,6 +695,16 @@ canvasSelected = false;
 
 function keyPressed() {
     if(!canvasSelected) {
+        return;
+    }
+    if(maker.currentTool == Maker.TOOLS.TEXT && maker.currentTool.mode == TextTool.MODES.TYPING) {
+        if(key.length == 1) {
+            maker.currentTool.addChar(key);
+        } else if(key == 'Enter') {
+            maker.currentTool.addChar('\n');
+        } else if(key == 'Backspace') {
+            maker.currentTool.backspace();
+        }
         return;
     }
     switch(key) {

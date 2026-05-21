@@ -302,6 +302,9 @@ class TileLike extends IDObject {
     flip(bounds, h, v) {
         throw new Error("Not implemented");
     }
+    rotate(bounds, c) {
+        throw new Error("Not implemented");
+    }
     getBounds() {
         throw new Error("Not implemented");
     }
@@ -430,6 +433,11 @@ class Group extends TileLike {
             child.flip(bounds, h, v);
         }
     }
+    rotate(bounds, c) {
+        for(let child of this.children) {
+            child.rotate(bounds, c);
+        }
+    }
 }
 
 class Tile extends TileLike {
@@ -522,6 +530,24 @@ class Tile extends TileLike {
             this.endY = bounds.endY - (sY - bounds.startY);
         }
     }
+    rotate(bounds, c) {
+        if(!this.ignoreRotation) {
+            this.rotation += c ? 3 : 1;
+            this.rotation = this.rotation % 4;
+        }
+        let sY = this.startY;
+        let oX = this.endX - this.startX;
+        let oY = this.endY - this.startY;
+        if(c) {
+            this.startY = bounds.startY + bounds.endX - this.startX - oX;
+            this.startX = bounds.startX + sY - bounds.startY;
+        } else {
+            this.startY = bounds.startY + this.startX - bounds.startX;
+            this.startX = bounds.startX + bounds.endY - sY - oY;
+        }
+        this.endY = this.startY + oX;
+        this.endX = this.startX + oY;
+    }
     getBounds() {
         return {startX: this.startX, startY: this.startY, endX: this.endX, endY: this.endY};
     }
@@ -541,6 +567,45 @@ class RectTile extends Tile {
     }
     static checkCollision(sX, sY, eX, eY, r, layer, mouseX, mouseY) {
         return mouseX > layer.toSCFX(sX) && mouseX < layer.toSCCY(eX) && mouseY > layer.toSCFX(sY) && mouseY < layer.toSCCY(eY);
+    }
+}
+
+class CharTile extends RectTile {
+    static {
+        TileTypeReference[this.name] = this;
+    }
+    static ROTATION = [0, 90, 180, 270];
+    constructor(ID, startX, startY, endX, endY, rotation, color, parent, char) {
+        super(ID, startX, startY, endX, endY, rotation, color, parent);
+        this.name = "CharTile";
+        this.ignoreRotation = false;
+        this.char = char;
+    }
+    static fromBlock(block, parent) {
+        let options = getOptions(block.head, 8);
+        return new TileTypeReference[options[0]](ID.getNext(), int(options[1]), int(options[2]), int(options[3]), int(options[4]), int(options[5]), options[6], parent, options[7]);
+    }
+    saveToString(indent) {
+        return ('\t'.repeat(indent)) + `${this.constructor.name} ${this.startX} ${this.startY} ${this.endX} ${this.endY} ${this.ignoreRotation ? 0 : this.rotation} ${this.color} ${this.char}`;
+    }
+    static drawRaw(sX, sY, eX, eY, r, layer) {
+        this.drawRawC(sX, sY, eX, eY, r, layer, 'A');
+    }
+    static drawRawC(sX, sY, eX, eY, r, layer, char) {
+        push();
+        translate(layer.toSCX(sX + (eX - sX + 1)/2), layer.toSCY(sY + (eY - sY + 1)/2));
+        rotate(CharTile.ROTATION[r]);
+        textSize(abs(layer.getGridSize() * max(eX - sX + 1, eY - sY + 1)));
+        text(char, 0, 0);
+        pop();
+    }
+    draw() {
+        fill(this.color);
+        CharTile.drawRawC(this.startX, this.startY, this.endX, this.endY, this.rotation, this.getLayer(), this.char);
+    }
+    drawOutline(offsetX, offsetY) {
+        noFill();
+        CharTile.drawRawC(this.startX+offsetX, this.startY+offsetY, this.endX+offsetX, this.endY+offsetY, this.rotation, this.getLayer(), this.char);
     }
 }
 
@@ -580,16 +645,16 @@ class QuadrantTile extends Tile {
         let h = eY - sY + 1;
         switch(int(r)) {
             case 0:
-                arc(layer.toSCFX(sX - w), layer.toSCFY(sY - h), layer.toSCCX(eX), layer.toSCCY(eY), 0, HALF_PI);
+                arc(layer.toSCFX(sX - w), layer.toSCFY(sY - h), layer.toSCCX(eX), layer.toSCCY(eY), 0, 90);
                 break;
             case 1:
-                arc(layer.toSCFX(sX), layer.toSCFY(sY - h), layer.toSCCX(eX + w), layer.toSCCY(eY), HALF_PI, PI);
+                arc(layer.toSCFX(sX), layer.toSCFY(sY - h), layer.toSCCX(eX + w), layer.toSCCY(eY), 90, 180);
                 break;
             case 2:
-                arc(layer.toSCFX(sX), layer.toSCFY(sY), layer.toSCCX(eX + w), layer.toSCCY(eY + h), PI, PI + HALF_PI);
+                arc(layer.toSCFX(sX), layer.toSCFY(sY), layer.toSCCX(eX + w), layer.toSCCY(eY + h), 180, 270);
                 break;
             case 3:
-                arc(layer.toSCFX(sX - w), layer.toSCFY(sY), layer.toSCCX(eX), layer.toSCCY(eY + h), PI + HALF_PI, TWO_PI);
+                arc(layer.toSCFX(sX - w), layer.toSCFY(sY), layer.toSCCX(eX), layer.toSCCY(eY + h), 270, 360);
                 break;
         }
     }
@@ -926,6 +991,14 @@ class BezierWedgeTile extends WedgeTile {
         point(this.getLayer().toSCX(this.getStartControlX()+offsetX), this.getLayer().toSCY(this.getStartControlY()+offsetY));
         point(this.getLayer().toSCX(this.getEndControlX()+offsetX), this.getLayer().toSCY(this.getEndControlY()+offsetY));
     }
+    flip(bounds, h, v) {
+        super.flip(bounds, h, v);
+        //TODO: Fix controls
+    }
+    rotate(bounds, c) {
+        super.rotate(bounds, c);
+        //TODO: Fix controls
+    }
 }
 
 class LineTile extends Tile {
@@ -986,6 +1059,9 @@ class LineTile extends Tile {
             this.startY = bounds.endY - (this.startY - bounds.startY) + 1;
             this.endY = bounds.endY - (this.endY - bounds.startY) + 1;
         }
+    }
+    rotate(bounds, c) {
+        //TODO
     }
 }
 

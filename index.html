@@ -142,6 +142,7 @@
             <button class="shapeButton" id="BEZIER_WEDGE_Button" onclick="setTool('BEZIER_WEDGE')"><img src="assets/bezier-wedge.png" alt="wedge tool"></button>
             <button class="shapeButton" id="LINE_Button" onclick="setTool('LINE')"><img src="assets/line.png" alt="line tool"></button>
             <button class="shapeButton" id="CURVE_Button" onclick="setTool('CURVE')"><img src="assets/curve.png" alt="curve tool"></button>
+            <button class="shapeButton" id="TEXT_Button" onclick="setTool('TEXT')"><img src="assets/text.png" alt="text tool"></button>
             <button id="ERASE_Button" onclick="setTool('ERASE')"><img src="assets/erase.png" alt="erase tool"></button>
             <button id="PAINT_Button" onclick="setTool('PAINT')"><img src="assets/fill.png" alt="fill tool"></button>
             <button id="SELECT_Button" onclick="setTool('SELECT')"><img src="assets/select.png" alt="select tool"></button>
@@ -168,6 +169,8 @@
             <button disabled onclick="rotateSelection(-1)"><img src="assets/rotate-reverse.png"></button> -->
             <button onclick="flipSelection(true, false)"><img src="assets/flip_horizontal.png" alt="flip horizontally"></button>
             <button onclick="flipSelection(false, true)"><img src="assets/flip_vertical.png" alt="flip vertically"></button>
+            <button onclick="rotateSelection(false)"><img src="assets/rotate_clockwise.png" alt="rotate clockwise"></button>
+            <button onclick="rotateSelection(true)"><img src="assets/rotate_counterclockwise.png" alt="rotate counterclockwise"></button>
             <button onclick="backSelection()"><img src="assets/bottom.png" alt="move to back"></button>
             <button onclick="frontSelection()"><img src="assets/top.png" alt="move to front"></button>
             <button onclick="eraseSelection()"><img src="assets/erase.png" alt="erase"></button>
@@ -179,6 +182,10 @@
             <button onclick="decreaseLineWeight()"><img src="assets/minus.png"></button>
             <span id="currentLineWeightSpan"></span>
             <button onclick="increaseLineWeight()"><img src="assets/plus.png"></button>
+          </div>
+          <div class="toolbarRow" style="display:none;" id="textTools">
+            <button onclick="cancelText()"><img src="assets/cancel.png" alt="cancel"></button>
+            <button onclick="confirmText()"><img src="assets/confirm.png" alt="confirm"></button>
           </div>
         </div>
       </div>

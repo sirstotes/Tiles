@@ -203,7 +203,7 @@ class AddTileAction extends Action {
     }
     run() {
         ID.withObject(this.layerID, (layer) => {
-            let t = new this.type(this.tileID, this.startX, this.startY, this.endX, this.endY, this.rotation, this.color);
+            let t = new this.type(this.tileID, this.startX, this.startY, this.endX, this.endY, this.rotation, this.color, undefined);
             layer.addChild(t);
         });
         return this.tileID;
@@ -213,6 +213,22 @@ class AddTileAction extends Action {
             maker.eraseTile(tile);
         });
         ID.removeObject(this.tileID);
+    }
+}
+class AddCharTileAction extends AddTileAction {
+    constructor(tileID, startX, startY, endX, endY, rotation, color, layerID, char) {
+        super(tileID, CharTile, startX, startY, endX, endY, rotation, color, layerID);
+        this.char = char;
+    }
+    toString() {
+        return super.toString() + ` ${this.char}`;
+    }
+    run() {
+        ID.withObject(this.layerID, (layer) => {
+            let t = new CharTile(this.tileID, this.startX, this.startY, this.endX, this.endY, this.rotation, this.color, undefined, this.char);
+            layer.addChild(t);
+        });
+        return this.tileID;
     }
 }
 class RemoveTileAction extends Action {
@@ -422,13 +438,7 @@ class FlipSelectionAction extends Action {
         this.selectionIDs = selection.tiles.map(t => t.ID);
         this.horizontal = horizontal;
         this.vertical = vertical;
-        this.bounds = selection.tiles.reduce((a, t) => {
-            let bounds = t.getBounds();
-            if(a == undefined) {
-                return bounds;
-            }
-            return {startX: min(a.startX, bounds.startX), startY: min(a.startY, bounds.startY), endX: max(a.endX, bounds.endX), endY: max(a.endY, bounds.endY)};
-        }, undefined);
+        this.bounds = selection.getBounds();
     }
     toString() {
         return `${this.name} ${this.horizontal} ${this.vertical}`;
@@ -442,5 +452,37 @@ class FlipSelectionAction extends Action {
     }
     undo() {
         this.run();
+    }
+}
+
+class RotateSelectionAction extends Action {
+    constructor(selection, counterclockwise) {
+        super("ROTATE");
+        this.selectionIDs = selection.tiles.map(t => t.ID);
+        this.counterclockwise = counterclockwise;
+        this.bounds = selection.getBounds();
+        this.rotatedBounds = {
+            startX: this.bounds.startX, 
+            endX: this.bounds.startX + (this.bounds.endY - this.bounds.startY), 
+            startY: this.bounds.startY, 
+            endY: this.bounds.startY + (this.bounds.endX - this.bounds.startX)
+        };
+    }
+    toString() {
+        return `${this.name} ${this.counterclockwise}`;
+    }
+    run() {
+        this.selectionIDs.forEach(id => {
+            ID.withObject(id, object => {
+                object.rotate(this.bounds, this.counterclockwise);
+            });
+        });
+    }
+    undo() {
+        this.selectionIDs.forEach(id => {
+            ID.withObject(id, object => {
+                object.rotate(this.rotatedBounds, !this.counterclockwise);
+            });
+        });
     }
 }

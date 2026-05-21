@@ -13,7 +13,8 @@ class Maker {//TODO split into maker and canvas
         EYEDROP: new ColorSelectTool(),
         BEZIER: new BezierTool(),
         LINE: new LineTool(),
-        CURVE: new CurveTool()
+        CURVE: new CurveTool(),
+        TEXT: new TextTool()
     }
     constructor(width, height, resolution, layers, backgroundColor) {
         this.width = width;
@@ -354,15 +355,12 @@ class Maker {//TODO split into maker and canvas
         }
         this.submitActions();
     }
-    rotateSelection(direction) {
-        if(direction > 0) {
-            
-        } else {
-
-        }
-    }
     flipSelection(h, v) {
         this.addAction(new FlipSelectionAction(this.selection, h, v));
+        this.submitActions();
+    }
+    rotateSelection(c) {
+        this.addAction(new RotateSelectionAction(this.selection, c));
         this.submitActions();
     }
     eraseSelection() {

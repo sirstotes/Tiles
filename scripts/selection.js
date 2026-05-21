@@ -103,4 +103,13 @@ class Selection {
         }
         return true;
     }
+    getBounds() {
+        return this.tiles.reduce((a, t) => {
+            let bounds = t.getBounds();
+            if(a == undefined) {
+                return bounds;
+            }
+            return {startX: min(a.startX, bounds.startX), startY: min(a.startY, bounds.startY), endX: max(a.endX, bounds.endX), endY: max(a.endY, bounds.endY)};
+        }, undefined);
+    }
 }

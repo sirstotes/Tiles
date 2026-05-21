@@ -139,7 +139,7 @@ class ShapeTool extends DraggableTool {
     }
     draw(maker, mouseX, mouseY) {
         if(Tool.DRAG_MODE == Tool.DRAG_MODE_OPTIONS.AREA && (!window.mobileAndTabletCheck() || clickingOnCanvas)) {
-            strokeWeight(0);
+            noStroke();
             fill(maker.getColor());
             this.shapeType.drawRaw(this.getStartX(), this.getStartY(), this.getEndX(), this.getEndY(), this.rotation, this.layer);
         }
@@ -352,6 +352,105 @@ class CurveTool extends ShapeTool {
         super.onMouseReleased(maker, mouseX, mouseY);
         this.place(maker, this.getStartX(), this.getStartY(), this.getEndX(), this.getEndY(), this.rotation, maker.getColor(), this.layer);
         maker.submitActions();
+    }
+}
+
+class TextTool extends DraggableTool {//TODO: move cursor
+    static MODES = {
+        SETTING: 0,
+        TYPING: 1
+    }
+    constructor() {
+        super("TEXT");
+        this.rotation = 0;
+        this.mode = TextTool.MODES.SETTING;
+        this.box = {};
+        this.text = '';
+        this.frame = 0;
+    }
+    onEnable(maker) {
+        super.onEnable(maker);
+        this.mode = TextTool.MODES.SETTING;
+        this.box = {};
+        this.text = '';
+    }
+    draw(maker, mouseX, mouseY) {
+        if(this.mode == TextTool.MODES.SETTING) {
+            if(!window.mobileAndTabletCheck() || clickingOnCanvas) {
+                noStroke();
+                fill(maker.getColor());
+                CharTile.drawRaw(this.getStartX(), this.getStartY(), this.getEndX(), this.getEndY(), this.rotation, this.layer);
+                strokeWeight(2);
+                stroke(maker.getColor());
+                noFill();
+                rect(this.layer.toSCFX(this.getStartX()), this.layer.toSCFY(this.getStartY()), this.layer.toSCCX(this.getEndX()), this.layer.toSCCY(this.getEndY()));
+            }
+        } else {
+            let x = this.box.x;
+            let y = this.box.y;
+            noStroke();
+            fill(maker.getColor());
+            for(let i = 0; i < this.text.length; i ++) {
+                if(this.text[i] == '\n') {
+                    x = this.box.x;
+                    y += this.box.h;
+                } else {
+                    if(this.text[i] != ' ') {
+                        CharTile.drawRawC(x, y, x + this.box.w - 1, y + this.box.h - 1, this.rotation, this.layer, this.text[i]);
+                    }
+                    x += this.box.w;
+                }
+            }
+            if(this.frame > 32) {
+                strokeWeight(2);
+                stroke(maker.getColor());
+                noFill();
+                rect(this.layer.toSCFX(x), this.layer.toSCFY(y), this.layer.toSCCX(x + this.box.w - 1), this.layer.toSCCY(y + this.box.h - 1));
+            }
+        }
+        this.frame = (this.frame + 1) % 64;
+    }
+    onMouseReleased(maker, mouseX, mouseY) {
+        super.onMouseReleased(maker, mouseX, mouseY);
+        if(this.mode == TextTool.MODES.SETTING) {
+            this.mode = TextTool.MODES.TYPING;
+            this.text = '';
+            this.box = {x: this.getStartX(), y: this.getStartY(), w: this.getEndX() - this.getStartX() + 1, h: this.getEndY() - this.getStartY() + 1};
+        }
+        //this.place(maker, this.getStartX(), this.getStartY(), this.getEndX(), this.getEndY(), this.rotation, maker.getColor(), this.layer);
+        //maker.submitActions();
+    }
+    addChar(char) {
+        this.text += char;
+    }
+    backspace() {
+        this.text = this.text.slice(0, -1);
+    }
+    confirm() {
+        let x = this.box.x;
+        let y = this.box.y;
+        for(let i = 0; i < this.text.length; i ++) {
+            if(this.text[i] == '\n') {
+                x = this.box.x;
+                y += this.box.h;
+            } else {
+                if(this.text[i] != ' ') {
+                    this.layer.forEach((tile) => {
+                        if(tile.overlapsWith(x, y, x + this.box.w - 1, y + this.box.h - 1)) {
+                            this.maker.addAction(new RemoveTileAction(tile));
+                        }
+                    });
+                    this.maker.addAction(new AddCharTileAction(ID.getNext(), x, y, x + this.box.w - 1, y + this.box.h - 1, this.rotation, this.maker.getColor(), this.layer.ID, this.text[i]));
+                }
+                x += this.box.w;
+            }
+        }
+        this.maker.submitActions();
+        this.cancel();
+    }
+    cancel() {
+        this.mode = TextTool.MODES.SETTING;
+        this.text = '';
     }
 }
 
