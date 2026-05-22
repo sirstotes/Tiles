@@ -588,8 +588,8 @@ function setup() {
         loadColors([...defaultPalette]);
     }
 
-    //loadFont('/assets/CourierPrime-Regular.ttf');
-    textFont('Courier New');
+    loadFont('/assets/JetBrainsMono-ExtraBold.ttf');
+    textFont('JetBrainsMono-ExtraBold');
     textAlign(CENTER, CENTER);
     angleMode(DEGREES);
 
