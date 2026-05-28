@@ -77,7 +77,6 @@ main {
     flex-direction: column;
     padding: 8px;
     gap: 8px;
-    overflow-x: auto;
     align-items: stretch;
     align-self: stretch;
     pointer-events: auto;
@@ -90,6 +89,7 @@ main {
     display: flex;
     flex-direction: row;
     gap: 4px;
+    overflow: auto;
 }
 .toolbarRow > button {
     flex-grow: 1;

@@ -45,6 +45,9 @@ class Selection {
         this.displayOffsetY = 0;
     }
     applyOffset(maker) {
+        if(this.displayOffsetX == 0 && this.displayOffsetY == 0) {
+            return;
+        }
         this.hasMoved = true;
         for(let tile of this.tiles) {
             maker.addAction(new MoveTileAction(tile.ID, this.displayOffsetX, this.displayOffsetY));

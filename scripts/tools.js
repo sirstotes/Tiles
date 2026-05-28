@@ -85,6 +85,7 @@ class DraggableTool extends Tool {
     onMousePressed(maker, mouseX, mouseY) {
         this.clickMouseX = mouseX;
         this.clickMouseY = mouseY;
+        this.setStart(mouseX, mouseY);
     }
     onMouseReleased(maker, mouseX, mouseY) {
         this.dragging = false;
@@ -97,7 +98,7 @@ class DraggableTool extends Tool {
                 if(Tool.DRAG_MODE == Tool.DRAG_MODE_OPTIONS.AREA && this.clickMouseX != mouseX && this.clickMouseY != mouseY) {
                     this.dragging = true;
                 }
-            } else {
+            } else {//Hovering
                 this.setStart(mouseX, mouseY);
             }
         }

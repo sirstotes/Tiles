@@ -133,7 +133,7 @@
       </div>
       <div class="bar" id="bottomBar">
         <div class="toolbar">
-          <div class="toolbarRow">
+          <div class="toolbarRow" id="mainToolbar">
             <button class="shapeButton" id="RECT_Button" onclick="setTool('RECT')"><img src="assets/square.png" alt="rect tool"></button>
             <button class="shapeButton" id="WEDGE_Button" onclick="setTool('WEDGE')"><img src="assets/wedge.png" alt="wedge tool"></button>
             <!-- <button class="shapeButton" id="ELLIPSE_Button" onclick="setTool('ELLIPSE')"><img src="assets/circle.png"></button> -->
@@ -148,11 +148,11 @@
             <button id="SELECT_Button" onclick="setTool('SELECT')"><img src="assets/select.png" alt="select tool"></button>
             <button onclick="toggleMenu('toolSettings', this)"><img src="assets/gear.png" alt="tool settings"></button>
           </div>
-          <div class="toolbarRow">
+          <div class="toolbarRow" id="colorToolbar">
             <button id="paletteButton" onclick="toggleMenu('paletteSettings', this)"><img src="assets/palette.png" alt="palette"></button>
             <button id="EYEDROP_Button" onclick="setTool('EYEDROP')"><img src="assets/eye-dropper.png" alt="color select tool"></button>
-            <span id="colorPalette" style="flex-grow: 4;"></span>
-            <input type="color" id="colorPicker" value="#ff0000" onchange="setColor(this.value)">
+            <span id="colorPalette" style="flex-grow: 9;"></span>
+            <input style="flex-grow:1;" type="color" id="colorPicker" value="#ff0000" onchange="setColor(this.value)">
           </div>
         </div>
         <div class="extraBar">

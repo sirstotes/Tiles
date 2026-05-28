@@ -587,6 +587,7 @@ function setup() {
     } else {
         loadColors([...defaultPalette]);
     }
+    setColor(palette[0]);
 
     loadFont('/assets/JetBrainsMono-ExtraBold.ttf');
     textFont('JetBrainsMono-ExtraBold');
@@ -628,8 +629,6 @@ function setup() {
 
     rectMode(CORNERS);
     ellipseMode(CORNERS);
-    // loadColors(defaultPalette);
-    // setColor(defaultPalette[0]);
     noSmooth();
 }
 
